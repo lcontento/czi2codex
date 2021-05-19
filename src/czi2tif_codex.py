@@ -28,7 +28,7 @@ def replace_extension(path: str, ext: str):
 # TODO: filenames: channel should start from 1!!!
 def czi_to_tiffs(path: str,
                  outdir: str,
-                 template: str = '_{m:05}_Z{z:03}_CH{c:03}',
+                 template: str = '1_{m:05}_Z{z:03}_CH{c:03}',
                  #'1_{m}_Z{z}_CH{c}',
                  *,
                  compression: str = 'zlib',
@@ -37,8 +37,10 @@ def czi_to_tiffs(path: str,
     basename, _ = os.path.splitext(os.path.basename(path))
     if not os.path.exists(outdir):
         os.makedirs(outdir, exist_ok=True)
-    if not os.path.exists(outdir + 'Cyc' + basename[-2:] + '_reg1'):
-        os.makedirs(outdir + 'Cyc' + basename[-2:] + '_reg1', exist_ok=True)
+
+    foldername = 'cyc{:03}_reg001'.format(int(basename[-2:]))  # Cyc{cycle:d}_reg{region:d}
+    if not os.path.exists(os.path.join(outdir, foldername)):
+        os.makedirs(os.path.join(outdir, foldername), exist_ok=True)
 
     czi = CziFile(path)
 
@@ -91,8 +93,8 @@ def czi_to_tiffs(path: str,
             # Save tile as tiff
             # filename = template.format(c=c, z=z, m=m, basename=basename)
             # filename = os.path.join(outdir, filename)
-            foldername = 'Cyc' + basename[-2:] + '_reg1'  # Cyc{cycle:d}_reg{region:d}
-            filename = (foldername + template).format(c=c+1, z=z+1, m=m+1) # Codex format starts at 1!
+
+            filename = template.format(c=c+1, z=z+1, m=m+1) # Codex format starts at 1!
             filename = os.path.join(outdir, foldername, filename)
             tile_data, tile_shape = czi.read_image(S=0, T=0, C=c, Z=z, M=m)
             tifffile.imwrite(filename + '.tif', tile_data, compression=compression)
