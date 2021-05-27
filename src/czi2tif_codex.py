@@ -107,5 +107,7 @@ def czi_to_tiffs(path: str,
     with open(os.path.join(outdir, basename + '.xml'), 'w') as f:
         f.write(ElementTree.tostring(meta, encoding='unicode'))
 
+    print("...finished generation of .tif files! ........")
+
     # Return shape and metadata
     return C, Z, tiles, meta, tile_meta
