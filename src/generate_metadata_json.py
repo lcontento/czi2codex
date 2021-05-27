@@ -29,7 +29,7 @@ from lxml import etree
 
 
 def meta_to_json(meta: str,
-                 path_czi_files: str,
+                 image_path: str,
                  outdir: str,
                  channelnames:str,
                  exposuretime:str):
@@ -40,8 +40,8 @@ def meta_to_json(meta: str,
     meta: [Optional: str (path to metadata .xml) or etree]
         metadata, either path to xml-file, or etree-Object (directly inferred
         from czi2tif function)
-    path_czi_files: str
-        folder directory where the czi files are located
+    image_path: str
+        directory to czi file
     outdir: str
         where to save json file
     channelnames: str
@@ -51,9 +51,12 @@ def meta_to_json(meta: str,
     """
     tiling_mode = 'grid'    # TODO infer or user input?
 
+    basename, _ = os.path.splitext(os.path.basename(image_path))
+    path_czi_files = os.path.dirname(image_path)
+
     # parse Metadata to dict
     if isinstance(meta, str):
-        basename, _ = os.path.splitext(os.path.basename(meta))
+        # basename, _ = os.path.splitext(os.path.basename(meta))
         with open(meta, 'r') as f:
             contents = f.read()
         d = xmltodict.parse(contents)
@@ -94,7 +97,7 @@ def meta_to_json(meta: str,
 
         # Tile width, tile height
         # Tile_overlap: calculate with read_subblock_rect
-        czi = CziFile(path_czi_files + basename + '.czi')
+        czi = CziFile(os.path.join(path_czi_files, basename + '.czi'))
         S, T, C, Z, M, Y, X = czi.size
         tilepos = []
         # Get tile position,
@@ -183,7 +186,7 @@ def meta_to_json(meta: str,
     dict_json['tile_height'] = "TODO 1844" # TODO ??? Above tile_height was 2048
 
     # Write JSON file
-    with open(os.path.join(outdir, 'test_experiment.json'), 'w',
+    with open(os.path.join(outdir, 'experiment_test.json'), 'w',
               encoding='utf-8') as json_file:
         json.dump(dict_json, json_file, ensure_ascii=False, indent=4)
 
