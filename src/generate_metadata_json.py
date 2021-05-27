@@ -73,7 +73,7 @@ def meta_to_json(meta: str,
         'TileRegion']
 
     # Cycle information
-    files_czi = glob.glob(path_czi_files + '*.czi')
+    files_czi = glob.glob(os.path.join(path_czi_files, '*.czi'))
     # get cycle numbers
     cycles_nr_list = []
     for i in range(len(files_czi)):
@@ -186,9 +186,10 @@ def meta_to_json(meta: str,
     dict_json['tile_height'] = "TODO 1844" # TODO ??? Above tile_height was 2048
 
     # Write JSON file
-    with open(os.path.join(outdir, 'experiment_test.json'), 'w',
+    with open(os.path.join(outdir, 'experiment.json'), 'w',
               encoding='utf-8') as json_file:
         json.dump(dict_json, json_file, ensure_ascii=False, indent=4)
+    print('.....finished writing experiment.json file!.....')
 
 
     #
