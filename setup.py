@@ -6,7 +6,7 @@ setup(
     author='Erika Dudkin',
     author_email='erikadudkin@gmx.de',
     description='Covert czi-files to CODEX format',
-    license='MIT License',
+    license='Apache-2.0 License',
     url='url = https://github.com/erikadudki/czi2codex.git',
     packages=find_packages(),
     python_requires='>=3.6',
