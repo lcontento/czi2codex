@@ -18,7 +18,7 @@ import shutil
 #   - correction to default cytokit units (nanometers)
 #       (default_corr_to_cytokit_units = 10**9)
 #   - for finding number of cycles: searches for '.czi' files in directory
-#       path_czi_files
+#       basedir
 #   - tile_x_overl determined by difference between first two tiles
 #   - path_formats: keyence_multi_cycle_v01
 #      depending on if we want to consider multiple cycles, or one cycle:
@@ -90,16 +90,12 @@ def process_user_options(options_dir: str):
     return default_options
 
 
-
-
-##
-
 def meta_to_json(meta: Union[str, lxml.etree._Element],
-                 image_path: str,
+                 czidir: str,
                  outdir: str,
                  channelnames: str,
-                 exposuretime: str,
-                 options_dir: str):
+                 options_dir: str,
+                 exposuretime: str=None):
     """
     Creates channelnames.txt, exposure_times.txt and experiment.json.
     Parameters
@@ -107,8 +103,8 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     meta: [Optional: str (path to metadata .xml) or etree]
         metadata, either path to xml-file, or etree-Object (directly inferred
         from czi2tif function)
-    image_path: str
-        directory to czi file
+    czidir: str
+        directory to czi files
     outdir: str
         where to save json file
     channelnames: str
@@ -126,9 +122,18 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     # copy channelnames.txt to output directory
     if os.path.dirname(channelnames) != outdir:
         shutil.copyfile(channelnames, os.path.join(outdir, "channelnames.txt"))
+ ##
 
-    basename, _ = os.path.splitext(os.path.basename(image_path))
-    path_czi_files = os.path.dirname(image_path)
+    czi_filename, czi_ext = os.path.splitext(os.path.basename(czidir))
+    basedir = os.path.dirname(czidir)
+    # list of czi-files
+    czi_files = glob.glob(os.path.join(basedir, '*' + czi_ext))
+    num_cycles = len(czi_files)
+    ##
+    # For now:take only the metadata of first cycle to infer all necessary
+    # information TODO: read metadata for all cycles? is there more information
+    #  available?
+    basename = czi_filename.format(1) #'2020.07.08 Tonsil_betaTEST_sfter2-01'
 
     # parse Metadata to dict
     if isinstance(meta, str):
@@ -154,27 +159,27 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
         'ZStackSetup']['Interval']['Distance']
     d_dist = d_meta['Scaling']['Items']['Distance']
 
-
-
+    # ------------------
     # Cycle information
-    files_czi = glob.glob(os.path.join(path_czi_files, '*.czi'))
     # get cycle numbers
     cycles_nr_list = []
-    num_cycles = len(files_czi)
     for i in range(num_cycles):
         cycles_nr_list.append(int(os.path.splitext(os.path.basename(
-            files_czi[i]))[0][-2:]))
+            czi_files[i]))[0][-2:]))
 
+    # ------------
     # read channelnames.txt and exposure_time.txt
     cn = open(channelnames, "r")
-    # et = open(exposuretime, "r")    # TODO infer from metadata
 
-    exp_time_path = outdir + "exposure_times.txt"
-    if not os.path.exists(exp_time_path):
-        raise ValueError(exp_time_path + " does not exist. Should be created"
+    if exposuretime is None:
+        # default exposure-time directory
+        exposuretime = outdir + "exposure_times.txt"
+
+    if not os.path.exists(exposuretime):
+        raise ValueError(exposuretime + " does not exist. Should be created"
                                          "when creating the tif-files with "
                                          "'czi2ti_codex.czi_to_tiffs()'.")
-    et = open(exp_time_path, "r")
+    et = open(exposuretime, "r")
 
     # --------
     # Per_cycle_channel_names & Emission wavelength
@@ -191,7 +196,7 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
         # ----------
         # Tile width, tile height
         # Tile_overlap: calculate with read_subblock_rect
-        czi = CziFile(os.path.join(path_czi_files, basename + '.czi'))
+        czi = CziFile(os.path.join(basedir, basename + '.czi'))
         S, T, C, Z, M, Y, X = czi.size
         tilepos = []
         # Get tile position,
@@ -284,7 +289,7 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
 
     dict_json['name'] = basename
     dict_json['date'] = d_meta['Information']['Document']['CreationDate']
-    dict_json['path'] = path_czi_files
+    dict_json['path'] = basedir
     dict_json['outputPath'] = outdir
     dict_json['codex_instrument'] = user_input['codex_instrument'] # TODO done,  possibility of user input
     dict_json['microscope'] = d_meta['Information']['Instrument'][
@@ -300,7 +305,7 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     dict_json['bitDepth'] = int(d_meta['Information']['Image'][
                                     'ComponentBitCount'])
     dict_json['numRegions'] = S
-    dict_json['numCycles'] = len(files_czi)
+    dict_json['numCycles'] = len(czi_files)
     dict_json['numZPlanes'] = Z
     dict_json['numChannels'] = C
     dict_json['regionWidth'] = region_width
