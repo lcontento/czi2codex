@@ -35,7 +35,7 @@ def write_exposure_times(meta_dict, i_cycle, outdir):
         else:
             exptime.append(etime)
 
-    exp_filename = 'exposure'
+    exp_filename = 'exposure_times'
     txt = '.txt'
     # Check if exposure_times.txt already exist, if yes write exp-times into
     # new file: exposure_times_{TIMESTAMP_NOW}.txt file
@@ -43,11 +43,12 @@ def write_exposure_times(meta_dict, i_cycle, outdir):
             i_cycle == 1:
         timestamp = datetime.now()
         exp_filename = exp_filename + '_' + timestamp.strftime(
-            "%m%d%Y_%H%M%S") + txt
+            "%m%d%Y_%H%M%S")
         raise Warning("exposure_times.txt already exist. New exposure_times "
                       "file is created with the name '" + exp_filename +
                       "'.txt'")
 
+    # write exposure_times.txt file
     with open(os.path.join(outdir, exp_filename + txt), 'a') as filehandle:
         if i_cycle == 1:
             filehandle.write('Cycle,CH1,CH2,CH3,CH4 \n')
@@ -61,8 +62,7 @@ def write_exposure_times(meta_dict, i_cycle, outdir):
 
 
 # channel start from 1!!!
-def czi_to_tiffs(basedir: str,
-                 czi_filename: str,
+def czi_to_tiffs(czidir: str,
                  outdir: str,
                  template: str = '1_{m:05}_Z{z:03}_CH{c:03}',
                  #'1_{m}_Z{z}_CH{c}',
@@ -70,14 +70,17 @@ def czi_to_tiffs(basedir: str,
                  compression: str = 'zlib',
                  save_tile_metadata: bool = False):
 
+    czi_filename, czi_ext = os.path.splitext(os.path.basename(czidir))
+    basedir = os.path.dirname(czidir)
     # list of czi-files
-    czi_files = glob.glob(os.path.join(basedir, '*.czi'))
+    czi_files = glob.glob(os.path.join(basedir, '*' + czi_ext))
     num_cycles = len(czi_files)
+    # loop over cycles
     for i_cyc in range(1, num_cycles+1):
         # name of czi file without .czi extension
-        basename, _ = os.path.splitext(czi_filename.format(i_cyc))
+        basename = czi_filename.format(i_cyc)
 
-        czi = CziFile(os.path.join(basedir, basename + '.czi'))
+        czi = CziFile(os.path.join(basedir, basename + czi_ext))
 
         # output dir and foldername
         if not os.path.exists(outdir):
