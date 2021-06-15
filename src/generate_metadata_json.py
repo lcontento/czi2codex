@@ -6,11 +6,29 @@ import xmltodict
 from aicspylibczi import CziFile
 import numpy as np
 import json
+import yaml
 import lxml
 from lxml import etree
 from typing import Union
 import shutil
+from datetime import datetime
+import math
 
+# TODO: cannot find wavelengths, that are given in Sonias experiment.json file
+#   "wavelengths": [
+#    358,
+#    488,
+#    550,
+#    650
+#  ], (mine (Emission Wavelenghts are: [465, 561, 673, 773]
+# TODO: make path also windows possible (.path\to\windows)
+# TODO: check dict_json['tile_width'] after subtracting overlap -> will
+#   this be user input?
+# TODO: check results in /home/erika/Documents/Projects/CODEX/Data/
+#  test_czi2codex/all_cycles/experiment.json is something missing?
+# TODO: options.json file into options.yaml format for providing comments
+# TODO: call from terminal
+# TODO: add documentation
 # INFORMATION:
 # HARDCODED:
 #   - channel_names
@@ -31,11 +49,16 @@ import shutil
 #       for more information, see cytokit/python/pipeline/cytokit/io.py
 
 
+def convert_str2float_or_int(x):
+    conv_x = float(x) if '.' in x else int(x)
+    return conv_x
+
+
 def generate_std_options_file(outdir: str,
                               filename: str = '',
                               save=True):
     """
-    Generates a standard options-.json file, where the user can specify
+    Generates a standard options-.yaml file, where the user can specify
     her/his preferred microscopy/experiment settings.
     outdir: str
         directory where the options.json file will be saved.
@@ -44,9 +67,10 @@ def generate_std_options_file(outdir: str,
     """
     user_setting = {'codex_instrument': "CODEX instrument",
                     'tilingMode': "gridrows",
-                    'referenceCycle': "2",
-                    'referenceChannel': "1",
-                    'deconvolutionIterations': "25",
+                    'referenceCycle': 2,
+                    'referenceChannel': 1,
+                    'numSubTiles': 1,
+                    'deconvolutionIterations': 25,
                     'deconvolutionModel': "vectorial",
                     'useBackgroundSubtraction': True,
                     'useDeconvolution': True,
@@ -55,28 +79,32 @@ def generate_std_options_file(outdir: str,
                     'use3dDriftCompensation': True,
                     'useBleachMinimizingCrop': False,
                     'useBlindDeconvolution': False,
-                    'useDiagnosticMode': False}
+                    'useDiagnosticMode': False,
+                    'num_z_planes': 1,
+                    'tile_width_minus_overlap': None,
+                    'tile_height_minus_overlap': None}
 
-    # Write JSON file
+    # Write YAML file
     if save:
-        with open(os.path.join(outdir, 'options' + filename + '.json'), 'w',
-                  encoding='utf-8') as json_file:
-            json.dump(user_setting, json_file, ensure_ascii=False, indent=4)
+        with open(os.path.join(outdir, 'options' + filename + '.yaml'), 'w',
+                  encoding='utf-8') as yaml_file:
+            yaml.dump(user_setting, yaml_file)
+            # json.dump(user_setting, json_file, ensure_ascii=False, indent=4)
 
     return user_setting
 
 
 def process_user_options(options_dir: str):
-    """Process the user-input-options.json file. Add remaining default values,
+    """Process the user-input-options.yaml file. Add remaining default values,
     if not everything is given.
     options_dir: str
-        directory to options.json file
+        directory to options.yaml file
     """
     default_options = generate_std_options_file(outdir='', filename='',
                                                 save=False)
 
-    with open(options_dir) as json_file:
-        user_input = json.load(json_file)
+    with open(options_dir) as yaml_file:
+        user_input = yaml.load(yaml_file)
 
     # overwrite default options with user input options
     for key in user_input.keys():
@@ -131,8 +159,9 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     num_cycles = len(czi_files)
     ##
     # For now:take only the metadata of first cycle to infer all necessary
-    # information TODO: read metadata for all cycles? is there more information
-    #  available?
+    # information
+    # TODO: read metadata for all cycles? is there more information
+    #   available?
     basename = czi_filename.format(1) #'2020.07.08 Tonsil_betaTEST_sfter2-01'
 
     # parse Metadata to dict
@@ -173,7 +202,7 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
 
     if exposuretime is None:
         # default exposure-time directory
-        exposuretime = outdir + "exposure_times.txt"
+        exposuretime = os.path.join(outdir, "exposure_times.txt")
 
     if not os.path.exists(exposuretime):
         raise ValueError(exposuretime + " does not exist. Should be created"
@@ -220,11 +249,12 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
         # TODO: (?) FOR NOW: TAKE THE OVERLAP BETWEEN THE FIRST TWO TILES
         #  (although there are inconsistencies, we might need to check and
         #  incorporate! [205,205,205,204]
-        tile_overlap_x = tile_x_overl[0]
-        tile_overlap_y = tile_y_overl[0]
+        tile_overlap_x = round(tile_x_overl[0]/tile_width, 1)
+        tile_overlap_y = round(tile_y_overl[0]/tile_height, 1)
 
-    tile_width_after = tile_width - tile_overlap_x
-    tile_height_after = tile_height - tile_overlap_y
+
+    # tile_width_after = tile_width - math.floor(tile_overlap_x*tile_width)
+    # tile_height_after = tile_height - math.floor(tile_overlap_y*tile_height)
 
     # -------
     # Z Pitch = axial resolution
@@ -276,29 +306,35 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
         focus_offset_list.append(d_region_multitrack['Track'][i]['FocusOffset'])
     # check if focus_offset is the same for all channels
     if len(set(focus_offset_list)) == 1:
-        focus_offset = focus_offset_list[0]
+        f_o = focus_offset_list[0]
+        focus_offset = convert_str2float_or_int(f_o)
     else:
         raise ValueError('Focus offset is not the same for all channels. '
-                         'Please check, which Focus-offset value should be '
+                         'Please check, which focus-offset value should be '
                          'taken.')
 
+    timestamp = datetime.now()
+    dateprocessed = timestamp.strftime("%Y-%m-%dT%H:%M:%S.%f")
 
     # WRITE JSON
     # Dictionary with all entries for json file
     dict_json = {}
 
+    dict_json['version'] = "1.x.x.x"    # TODO ? user defined?
     dict_json['name'] = basename
+    dict_json['runName'] ="2020-11-04"  # TODO ? user defined?
     dict_json['date'] = d_meta['Information']['Document']['CreationDate']
+    dict_json['dateProcessed'] = dateprocessed
     dict_json['path'] = basedir
     dict_json['outputPath'] = outdir
     dict_json['codex_instrument'] = user_input['codex_instrument'] # TODO done,  possibility of user input
     dict_json['microscope'] = d_meta['Information']['Instrument'][
         'Microscopes']['Microscope']['@Name']
-    dict_json['magnification'] = str(magnification)
-    dict_json['numerical_aperture'] = d_obj['LensNA']
+    dict_json['magnification'] = magnification
+    dict_json['numerical_aperture'] = float(d_obj['LensNA'])
     dict_json['objectiveType'] = d_obj['Immersion']
-    dict_json['xyResolution'] = str(lateral_resolution)     # 377.442
-    dict_json['zPitch'] = str(axial_resolution)     # 1500.0
+    dict_json['xyResolution'] = lateral_resolution    # 377.442
+    dict_json['zPitch'] = axial_resolution     # 1500.0
     # dict_json['channel_arrangement'] = "grayscale" # TODO done, does not exist in SONIAs example file, only in codex-examplefile. tocheck
     dict_json['per_cycle_channel_names'] = channel_names  # [', '.join(map(str, channel_names))]
     dict_json['wavelengths'] = list(map(int, em_wv)) #[', '.join(map(int, em_wv))]
@@ -317,7 +353,7 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     dict_json['tilingMode'] = user_input['tilingMode']       # ?? TODO done, raise NotImplementedError in the other cases
     dict_json['referenceCycle'] = user_input['referenceCycle']       # TODO done, user-specifiable but the default value will be the good one almost everytime
     dict_json['referenceChannel'] = user_input['referenceChannel']          # TODO done, user-specifiable but in almost all cases will be 1
-    dict_json['numSubTiles'] = "1"                # TODO done, not sure, keep it fixed at 1 for now
+    dict_json['numSubTiles'] = user_input['numSubTiles']             # TODO done, not sure, keep it fixed at 1 for now
     dict_json['deconvolutionIterations'] = user_input['deconvolutionIterations']  # TODO done, user specifiable
     dict_json['deconvolutionModel'] = user_input['deconvolutionModel']  # TODO done, user specifiable
 
@@ -339,11 +375,11 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     dict_json['regIdx'] = [S]           # TODO done, is that correct? no idea..., leave it as it is in the example
     dict_json['cycle_lower_limit'] = min(cycles_nr_list)
     dict_json['cycle_upper_limit'] = max(cycles_nr_list)
-    dict_json['num_z_planes'] = "1"     # TODO done, Maybe the number of output z-planes (after focus merging), but I am not sure. For the moment I would leave it as in the example
+    dict_json['num_z_planes'] = user_input['num_z_planes']   # TODO done, Maybe the number of output z-planes (after focus merging), but I am not sure. For the moment I would leave it as in the example
     dict_json['region_width'] = region_width
     dict_json['region_height'] = region_height
-    dict_json['tile_width'] = "tile_width_after TODO 1844" # TODO ??? Above tile_width was 2048, where is this 1844 coming from?
-    dict_json['tile_height'] = "tile_height_after TODO 1844" # TODO ??? Above tile_height was 2048 ->  I think these are the tile dimensions after the overlap is subtracted (please check it)
+    dict_json['tile_width'] = user_input['tile_width_minus_overlap'] # TODO done , could be defined by 2048-math.floor(2048*0.1) , Above tile_width was 2048, where is this 1844 coming from?
+    dict_json['tile_height'] = user_input['tile_height_minus_overlap'] # TODO done , now: user defined. Above tile_height was 2048 ->  I think these are the tile dimensions after the overlap is subtracted (please check it)
     # TODO: to check: SONIA: tile_width = 2048, tileOverlapX=0.1,
     #  tile_width_after = 2048-2048*0.1 = 1843.2 ???
 
