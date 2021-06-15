@@ -1,6 +1,7 @@
 import os
 import tifffile
 import glob
+import warnings
 from xml.etree import ElementTree
 from itertools import product
 from aicspylibczi import CziFile
@@ -19,7 +20,8 @@ def replace_extension(path: str, ext: str):
     return base + os.path.extsep + ext
 
 
-def write_exposure_times(meta_dict, i_cycle, outdir):
+def write_exposure_times(meta_dict, i_cycle, outdir,
+                         exp_filename='exposure_times'):
     """Write exposure_times.txt. Infer the exposure times from given meta-xml
     given in dictionary format.
     Return path to saved exposure_times.txt file."""
@@ -35,7 +37,7 @@ def write_exposure_times(meta_dict, i_cycle, outdir):
         else:
             exptime.append(etime)
 
-    exp_filename = 'exposure_times'
+    # exp_filename = 'exposure_times'
     txt = '.txt'
     # Check if exposure_times.txt already exist, if yes write exp-times into
     # new file: exposure_times_{TIMESTAMP_NOW}.txt file
@@ -44,7 +46,7 @@ def write_exposure_times(meta_dict, i_cycle, outdir):
         timestamp = datetime.now()
         exp_filename = exp_filename + '_' + timestamp.strftime(
             "%m%d%Y_%H%M%S")
-        raise Warning("exposure_times.txt already exist. New exposure_times "
+        warnings.warn("exposure_times.txt already exist. New exposure_times "
                       "file is created with the name '" + exp_filename +
                       "'.txt'")
 
@@ -58,7 +60,7 @@ def write_exposure_times(meta_dict, i_cycle, outdir):
         filehandle.write('\n')
 
     exptime_path = os.path.join(outdir, exp_filename + txt)
-    return exptime_path
+    return exptime_path, exp_filename
 
 
 # channel start from 1!!!
@@ -124,7 +126,7 @@ def czi_to_tiffs(czidir: str,
             tilepos = czi.read_subblock_rect(S=0, T=0, C=0, Z=0, M=m) # returns: (x, y, w, h)
             tiles.append(tilepos)
             # Iterate over channel and focus
-            for (c, z) in product(range(C), range(Z)):
+            for (c, z) in product(range(C), range(1)): # TODO range(Z)
                 # Get tile position
                 cur_tilepos = czi.read_subblock_rect(S=0, T=0, C=c, Z=z, M=m)
                 if cur_tilepos != tilepos:
@@ -155,7 +157,10 @@ def czi_to_tiffs(czidir: str,
 
         # save exposure_times.txt for each cycle
         meta_dict = xmltodict.parse(etree.tostring(meta))
-        write_exposure_times(meta_dict, i_cyc, outdir)
+        if i_cyc == 1:
+            exp_filename = "exposure_times"
+        exp_filename = write_exposure_times(meta_dict, i_cyc, outdir,
+                                            exp_filename)
 
     print("...finished generation of .tif files and exposure.txt file! "
           "...........")
