@@ -20,7 +20,7 @@ from datetime import datetime
 #    550,
 #    650
 #  ], (mine (Emission Wavelenghts are: [465, 561, 673, 773]
-# TODO: call from terminal
+# TODO: YAML file with comments?
 # TODO: add documentation
 # INFORMATION:
 #   - For now: take only the metadata of first cycle to infer all necessary
