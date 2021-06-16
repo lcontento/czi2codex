@@ -7,7 +7,7 @@ setup(
     author_email='erikadudkin@gmx.de',
     description='Covert czi-files to CODEX format',
     license='Apache-2.0 License',
-    url='url = https://github.com/erikadudki/czi2codex.git',
+    url='https://github.com/erikadudki/czi2codex',
     packages=find_packages(),
     python_requires='>=3.6',
     install_requires=[
