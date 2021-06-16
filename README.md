@@ -3,18 +3,22 @@ Convert czi files to Codex-Processor format.
 
 from multicycle, multi-region czi files `czi2codex` will generate
 the following folder structure:
-```
-- **cyc001_reg001**
-    - 1_00001_Z001_CH1.tif
-    - ...
-- **cyc002_reg001**
-- **cyc003_reg001** 
-- ...
-- experiment.json
-- channelnames.txt
-- exposure_times.txt
-- options.yaml
-```
+
+<pre>
+|_ <b>cyc001_reg001</b>
+|    |
+|    |_ 1_00001_Z001_CH1.tif
+|    |_ 1_00001_Z001_CH2.tif
+|    |_ ...
+|_ <b>cyc002_reg001</b>
+|_ <b>cyc003_reg001</b> 
+|_ ...
+|_ experiment.json
+|_ channelnames.txt
+|_ exposure_times.txt
+|_ options.yaml
+</pre>
+
 # Installation
 ## Linux
 ### Optional: 
