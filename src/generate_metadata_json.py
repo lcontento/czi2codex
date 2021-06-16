@@ -113,7 +113,7 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
                  options_dir: str,
                  exposuretime: str=None):
     """
-    Creates channelnames.txt, exposure_times.txt and experiment.json.
+    Creates experiment.json.
     Parameters
     ----------
     meta: [Optional: str (path to metadata .xml) or etree]
@@ -130,6 +130,7 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     options_dir: str
         directory to options.json file
     """
+    print(f"Starting to generate experiment.json file.")
     tiling_mode = 'grid'    # TODO infer or user input?
 
     # get user input options
@@ -138,14 +139,13 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     # copy channelnames.txt to output directory
     if os.path.dirname(channelnames) != outdir:
         shutil.copyfile(channelnames, os.path.join(outdir, "channelnames.txt"))
- ##
 
     czi_filename, czi_ext = os.path.splitext(os.path.basename(czidir))
     basedir = os.path.dirname(czidir)
     # list of czi-files
     czi_files = glob.glob(os.path.join(basedir, '*' + czi_ext))
     num_cycles = len(czi_files)
-    ##
+
     # For now:take only the metadata of first cycle to infer all necessary
     # information
     # TODO: read metadata for all cycles? is there more information
@@ -375,7 +375,8 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     with open(os.path.join(outdir, 'experiment.json'), 'w',
               encoding='utf-8') as json_file:
         json.dump(dict_json, json_file, ensure_ascii=False, indent=4)
-    print('.....finished writing experiment.json file!.....')
+    print('...Finished writing experiment.json file!..... \n'
+          f'...Saved in {outdir}')
 
     return
 

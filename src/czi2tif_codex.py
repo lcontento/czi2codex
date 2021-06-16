@@ -43,8 +43,9 @@ def write_exposure_times(meta_dict, i_cycle, outdir,
             overwrite_exposure is False:
         if i_cycle == 1:
             warnings.warn(
-                f'Exposure times file {exp_filename} already exist. '
-                f'Replace with overwrite_exposure=True.')
+                f'\nWARNING: Exposure times file {exp_filename} already exist. '
+                f'If it shall be replaced, define: overwrite_exposure_times: '
+                f'true')
     else:
         if os.path.exists(os.path.join(outdir, exp_filename)) and \
                 overwrite_exposure and i_cycle == 1:
@@ -99,7 +100,8 @@ def czi_to_tiffs(czidir: str,
     tile_meta:
         metadata for each tile
     """
-
+    print('.......................................')
+    print('Starting to run conversion czi to tifs.')
     czi_filename, czi_ext = os.path.splitext(os.path.basename(czidir))
     basedir = os.path.dirname(czidir)
     # list of czi-files
@@ -186,11 +188,16 @@ def czi_to_tiffs(czidir: str,
         # save exposure_times.txt for each cycle
         meta_dict = xmltodict.parse(etree.tostring(meta))
 
+        if i_cyc == 1:
+            print('Starting to write the exposure.txt file. \n'
+                  f'Cycle = {str(i_cyc)}')
+        else:
+            print(f'Cycle = {str(i_cyc)}')
         write_exposure_times(meta_dict, i_cyc, outdir,
                              overwrite_exposure)
 
-    print("...finished generation of .tif files and exposure.txt file! "
-          "...........")
+    print(f"...finished generation of .tif files and exposure.txt file! ...\n"
+          f"...Saved in {outdir}")
 
     # Return shape and metadata
     return C, Z, tiles, meta, tile_meta
