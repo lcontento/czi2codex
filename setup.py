@@ -9,7 +9,13 @@ setup(
     license='Apache-2.0 License',
     url='https://github.com/erikadudki/czi2codex',
     packages=find_packages(),
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     install_requires=[
+        'scikit-image',
+        'aicspylibczi>=2,<3',
+        'tifffile',
+        'pyyaml',
+        'xmltodict',
+        'lxml'
     ]
 )
