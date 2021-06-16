@@ -21,32 +21,20 @@ import math
 #    550,
 #    650
 #  ], (mine (Emission Wavelenghts are: [465, 561, 673, 773]
-# TODO: make path also windows possible (.path\to\windows)
-# TODO: check dict_json['tile_width'] after subtracting overlap -> will
-#   this be user input?
-# TODO: check results in /home/erika/Documents/Projects/CODEX/Data/
-#  test_czi2codex/all_cycles/experiment.json is something missing?
-# TODO: options.json file into options.yaml format for providing comments
 # TODO: call from terminal
 # TODO: add documentation
 # INFORMATION:
-# HARDCODED:
-#   - channel_names
-#   - tiling_mode = grid
-#   - correction to default cytokit units (nanometers)
-#       (default_corr_to_cytokit_units = 10**9)
+#   - For now: take only the metadata of first cycle to infer all necessary
+#     information
+#   - correction to default units in codex (nanometers)
+#     default_corr_to_codex_units = 1e9
+#     correction in: zPitch, xyResolution
 #   - for finding number of cycles: searches for '.czi' files in directory
 #       basedir
-#   - tile_x_overl determined by difference between first two tiles
-#   - path_formats: keyence_multi_cycle_v01
-#      depending on if we want to consider multiple cycles, or one cycle:
-#       - keyence_single_cycle_v01:
-#           image file name should be in format:
-#           {region:d}_{tile:05d}_Z{z:03d}_CH{channel:d}.tif
-#       - keyence_multi_cycle_v01
-#           image file name should be in format:
-#           Cyc{cycle:d}_reg{region:d}/{region:d}_{tile:05d}_Z{z:03d}_CH{channel:d}.tif
-#       for more information, see cytokit/python/pipeline/cytokit/io.py
+#   - tile_x_overl determined by difference between first two tiles, FOR NOW:
+#         # TAKE THE OVERLAP BETWEEN THE FIRST TWO TILES
+#         #  (although there are inconsistencies, we might need to check and
+#         #  incorporate! [205,205,205,204]
 
 
 def convert_str2float_or_int(x):
@@ -61,9 +49,9 @@ def generate_std_options_file(outdir: str,
     Generates a standard options-.yaml file, where the user can specify
     her/his preferred microscopy/experiment settings.
     outdir: str
-        directory where the options.json file will be saved.
+        directory where the options.yaml file will be saved.
     filename: str
-        add-ons for the filename: options_ADD_ON_FILENAME.json
+        add-ons for the filename: options_ADD_ON_FILENAME.yaml
     """
     user_setting = {'codex_instrument': "CODEX instrument",
                     'tilingMode': "gridrows",
@@ -104,7 +92,7 @@ def process_user_options(options_dir: str):
                                                 save=False)
 
     with open(options_dir) as yaml_file:
-        user_input = yaml.load(yaml_file)
+        user_input = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
     # overwrite default options with user input options
     for key in user_input.keys():
@@ -331,7 +319,7 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     dict_json['microscope'] = d_meta['Information']['Instrument'][
         'Microscopes']['Microscope']['@Name']
     dict_json['magnification'] = magnification
-    dict_json['numerical_aperture'] = float(d_obj['LensNA'])
+    dict_json['aperture'] = float(d_obj['LensNA'])
     dict_json['objectiveType'] = d_obj['Immersion']
     dict_json['xyResolution'] = lateral_resolution    # 377.442
     dict_json['zPitch'] = axial_resolution     # 1500.0
