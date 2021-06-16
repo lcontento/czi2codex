@@ -7,7 +7,6 @@ from itertools import product
 from aicspylibczi import CziFile
 import xmltodict
 from lxml import etree
-from datetime import datetime
 
 
 def extension(path: str, *, lower: bool = True):
