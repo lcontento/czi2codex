@@ -5,18 +5,19 @@ from multicycle, multi-region czi files `czi2codex` will generate
 the following folder structure:
 
 <pre>
-|_ <b>cyc001_reg001</b>
-|    |
-|    |_ 1_00001_Z001_CH1.tif
-|    |_ 1_00001_Z001_CH2.tif
-|    |_ ...
-|_ <b>cyc002_reg001</b>
-|_ <b>cyc003_reg001</b> 
-|_ ...
-|_ experiment.json
-|_ channelnames.txt
-|_ exposure_times.txt
-|_ options.yaml
+outdir
+    |_ <b>cyc001_reg001</b>
+    |    |
+    |    |_ 1_00001_Z001_CH1.tif
+    |    |_ 1_00001_Z001_CH2.tif
+    |    |_ ...
+    |_ <b>cyc002_reg001</b>
+    |_ <b>cyc003_reg001</b> 
+    |_ ...
+    |_ experiment.json
+    |_ channelnames.txt
+    |_ exposure_times.txt
+    |_ options.yaml
 </pre>
 
 # Installation
