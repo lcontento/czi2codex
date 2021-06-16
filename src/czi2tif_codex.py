@@ -21,7 +21,7 @@ def replace_extension(path: str, ext: str):
 
 
 def write_exposure_times(meta_dict, i_cycle, outdir,
-                         exp_filename='exposure_times'):
+                         overwrite_exposure=False):
     """Write exposure_times.txt. Infer the exposure times from given meta-xml
     given in dictionary format.
     Return path to saved exposure_times.txt file."""
@@ -37,40 +37,68 @@ def write_exposure_times(meta_dict, i_cycle, outdir,
         else:
             exptime.append(etime)
 
-    # exp_filename = 'exposure_times'
-    txt = '.txt'
-    # Check if exposure_times.txt already exist, if yes write exp-times into
-    # new file: exposure_times_{TIMESTAMP_NOW}.txt file
-    if os.path.exists(os.path.join(outdir, exp_filename + txt)) and \
-            i_cycle == 1:
-        timestamp = datetime.now()
-        exp_filename = exp_filename + '_' + timestamp.strftime(
-            "%m%d%Y_%H%M%S")
-        warnings.warn("exposure_times.txt already exist. New exposure_times "
-                      "file is created with the name '" + exp_filename +
-                      "'.txt'")
-
-    # write exposure_times.txt file
-    with open(os.path.join(outdir, exp_filename + txt), 'a') as filehandle:
+    exp_filename = 'exposure_times.txt'
+    # Check if exposure_times.txt already exist
+    if os.path.exists(os.path.join(outdir, exp_filename)) and \
+            overwrite_exposure is False:
         if i_cycle == 1:
-            filehandle.write('Cycle,CH1,CH2,CH3,CH4 \n')
-        filehandle.write(str(i_cycle))
-        for listitem in exptime:
-            filehandle.write(',%s' % listitem)
-        filehandle.write('\n')
+            warnings.warn(
+                f'Exposure times file {exp_filename} already exist. '
+                f'Replace with overwrite_exposure=True.')
+    else:
+        if os.path.exists(os.path.join(outdir, exp_filename)) and \
+                overwrite_exposure and i_cycle == 1:
+            os.remove(os.path.join(outdir, exp_filename))
+        # write exposure_times.txt file
+        with open(os.path.join(outdir, exp_filename), 'a') as filehandle:
+            if i_cycle == 1:
+                filehandle.write('Cycle,CH1,CH2,CH3,CH4 \n')
+            filehandle.write(str(i_cycle))
+            for listitem in exptime:
+                filehandle.write(',%s' % listitem)
+            filehandle.write('\n')
 
-    exptime_path = os.path.join(outdir, exp_filename + txt)
-    return exptime_path, exp_filename
+    exptime_path = os.path.join(outdir, exp_filename)
+    return exptime_path
 
 
 # channel start from 1!!!
 def czi_to_tiffs(czidir: str,
                  outdir: str,
                  template: str = '1_{m:05}_Z{z:03}_CH{c:03}',
+                 overwrite_exposure: bool = False,
                  #'1_{m}_Z{z}_CH{c}',
                  *,
                  compression: str = 'zlib',
                  save_tile_metadata: bool = False):
+    """
+    Reads czi files and converts them to tifs. Furthermore exposure_times.txt
+    files are created.
+    Parameters:
+    -----------
+    czidir: str
+        directory of czi-files, with filename-template for the
+        different cycles (e.g. '/dir/to/czifiles/filename_CYC{:02}.czi')
+    outdir: str
+        output directory, where everything should be saved
+    template: str
+        output-filenaming template, default is: '1_{m:05}_Z{z:03}_CH{c:03}'
+    overwrite_exposure: bool
+        if exposure_times.txt already exists, should it be overwritten or not?
+    compression: str
+        tiffile-compression
+    save_tile_metadata: bool
+        save metadata for each tile?
+    Returns:
+    --------
+    C - Channels
+    Z - Z-Planes
+    tiles
+    meta: lxml.etree._Element
+        metadata-object
+    tile_meta:
+        metadata for each tile
+    """
 
     czi_filename, czi_ext = os.path.splitext(os.path.basename(czidir))
     basedir = os.path.dirname(czidir)
@@ -157,10 +185,9 @@ def czi_to_tiffs(czidir: str,
 
         # save exposure_times.txt for each cycle
         meta_dict = xmltodict.parse(etree.tostring(meta))
-        if i_cyc == 1:
-            exp_filename = "exposure_times"
-        exp_filename = write_exposure_times(meta_dict, i_cyc, outdir,
-                                            exp_filename)
+
+        write_exposure_times(meta_dict, i_cyc, outdir,
+                             overwrite_exposure)
 
     print("...finished generation of .tif files and exposure.txt file! "
           "...........")
