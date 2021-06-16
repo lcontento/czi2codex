@@ -4,11 +4,11 @@ Convert czi files to Codex-Processor format.
 from multicycle, multi-region czi files `czi2codex` will generate
 the following folder structure:
 ```
-- cyc001_reg001
+- **cyc001_reg001**
     - 1_00001_Z001_CH1.tif
     - ...
-- cyc002_reg001 
-- cyc003_reg001 
+- **cyc002_reg001**
+- **cyc003_reg001** 
 - ...
 - experiment.json
 - channelnames.txt
@@ -17,7 +17,7 @@ the following folder structure:
 ```
 # Installation
 ## Linux
-###Optional: 
+### Optional: 
 Create a conda-environment where all needed packages with the needed correct versions will be installed. 
 Type in your terminal:
 ```buildoutcfg
