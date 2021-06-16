@@ -20,9 +20,9 @@ outdir
     |_ options.yaml
 </pre>
 
-# Installation
+# Installation 
 ## Linux
-### Optional: 
+### Optional (Creating an environment) 
 Create a conda-environment where all needed packages with the needed correct versions will be installed. 
 Type in your terminal:
 ```buildoutcfg
@@ -34,17 +34,19 @@ call:
 ```buildoutcfg
 $ conda activate codex-env
 ```
+### Installation
 Enter the czi2codex directory, in which the `setup.py` file is 
 located, and run:
 ```
 $ pip install .
 ```
+
+# Generation of standard setting file
 Enter the directory of the source code:
 ```
 $ cd src
 ```
-# Generation of standard setting file
-A prerequisite of using the czi2codex conversion-tool is having a 
+A prerequisite of using the czi2codex conversion-tool is having an 
 `options.yaml` file, where mandatory user settings can be saved/changed. In order
 to generate the backbone of this file, which then needs to be filled by the 
 user, you can run:
@@ -60,3 +62,7 @@ $ python3 run_czi2codex.py /dir/to/optionsfile/options.yaml
 ```
 with `/dir/to/optionsfile/options.yaml`, being the directory path, where 
 `options.yaml` is located. 
+This will generate 
+- the `.tif` files for each cycle, channel and tile
+- `exposure_times.txt`
+- `experiment.json`
