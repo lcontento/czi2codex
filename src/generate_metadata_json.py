@@ -2,6 +2,8 @@
 # use of codex processor
 import os
 import glob
+import warnings
+
 import xmltodict
 from aicspylibczi import CziFile
 import numpy as np
@@ -12,6 +14,7 @@ from lxml import etree
 from typing import Union
 import shutil
 from datetime import datetime
+from run_generate_std_options_file import generate_std_options_file
 
 # TODO: cannot find wavelengths, that are given in Sonias experiment.json file
 #   "wavelengths": [
@@ -39,54 +42,6 @@ from datetime import datetime
 def convert_str2float_or_int(x):
     conv_x = float(x) if '.' in x else int(x)
     return conv_x
-
-
-def generate_std_options_file(outdir: str,
-                              filename: str = '',
-                              save=True):
-    """
-    Generates a standard options-.yaml file, where the user can specify
-    her/his preferred microscopy/experiment settings.
-    outdir: str
-        directory where the options.yaml file will be saved.
-    filename: str
-        add-ons for the filename: options_ADD_ON_FILENAME.yaml
-    """
-    user_setting = {'1_czidir': "/home/erika/Documents/Projects/CODEX/Data/Collaborators_OriginalData/20200708 Tonsil_beta_after2_compressed/2020.07.08 Tonsil_betaTEST_sfter2-{:02}.czi",
-                    '1_outdir': "/home/erika/Documents/Projects/CODEX/Data/test_czi2codex/all_cycles/",
-                    '1_channelnames_dir': "/home/erika/Documents/Projects/CODEX/Data/test_czi2codex/ORIGINAL_FILES/channelNamesSONIA.txt",
-                    '1_overwrite_exposure_times': False,
-                    '1_out_template': "1_{m:05}_Z{z:03}_CH{c:03}",
-                    'codex_instrument': "CODEX instrument",
-                    'tilingMode': "gridrows",
-                    'referenceCycle': 2,
-                    'referenceChannel': 1,
-                    'numSubTiles': 1,
-                    'deconvolutionIterations': 25,
-                    'deconvolutionModel': "vectorial",
-                    'useBackgroundSubtraction': True,
-                    'useDeconvolution': True,
-                    'useExtendedDepthOfField': True,
-                    'useShadingCorrection': True,
-                    'use3dDriftCompensation': True,
-                    'useBleachMinimizingCrop': False,
-                    'useBlindDeconvolution': False,
-                    'useDiagnosticMode': False,
-                    'num_z_planes': 1,
-                    'tile_width_minus_overlap': None,
-                    'tile_height_minus_overlap': None}
-
-    # Write YAML file
-    if save:
-        with open(os.path.join(outdir, 'options' + filename + '.yaml'), 'w',
-                  encoding='utf-8') as yaml_file:
-            yaml.dump(user_setting, yaml_file)
-        print("...finished generating the standard options.yaml file. \n"
-              "Saved in "
-              f"{os.path.join(outdir,'options' + filename + '.yaml')}")
-            # json.dump(user_setting, json_file, ensure_ascii=False, indent=4)
-
-    return user_setting
 
 
 def process_user_options(options_dir: str):
@@ -247,6 +202,22 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
         tile_overlap_x = round(tile_x_overl[0]/tile_width, 1)
         tile_overlap_y = round(tile_y_overl[0]/tile_height, 1)
 
+    if len(user_input['wavelengths']) != C:
+        raise ValueError(f"The number of given wavelengths ("
+                         f"{len(user_input['wavelengths'])}) in the "
+                         f"options.yaml file doesn't coincide with the number "
+                         f"of channels ({C}). "
+                         "Please check the given wavelengths. ")
+    em_wv_int = [int(i) for i in em_wv]
+    for i_wv in user_input['wavelengths']:
+        if i_wv not in em_wv_int:
+            warnings.warn('The user defined wavelengths do not coincide with the '
+                    'Emission wavelengths found in the metadata. \n'
+                    'User defined wavelengths: \n' +
+                    str(user_input['wavelengths']) + '\n'
+                    'Emission wavelengths extracted from metadata: \n' +
+                    str(em_wv_int) + '\nPlease check. User inputed wavelengths '
+                                     'are taken.')
 
     # tile_width_after = tile_width - math.floor(tile_overlap_x*tile_width)
     # tile_height_after = tile_height - math.floor(tile_overlap_y*tile_height)
@@ -332,7 +303,7 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
     dict_json['zPitch'] = axial_resolution     # 1500.0
     # dict_json['channel_arrangement'] = "grayscale" # TODO done, does not exist in SONIAs example file, only in codex-examplefile. tocheck
     dict_json['per_cycle_channel_names'] = channel_names  # [', '.join(map(str, channel_names))]
-    dict_json['wavelengths'] = list(map(int, em_wv)) #[', '.join(map(int, em_wv))]
+    dict_json['wavelengths'] = user_input['wavelengths']  #list(map(int, em_wv)) #[', '.join(map(int, em_wv))]
     dict_json['bitDepth'] = int(d_meta['Information']['Image'][
                                     'ComponentBitCount'])
     dict_json['numRegions'] = S
@@ -386,4 +357,5 @@ def meta_to_json(meta: Union[str, lxml.etree._Element],
           f'...Saved in {outdir}')
 
     return
+
 
