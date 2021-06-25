@@ -155,7 +155,7 @@ def czi_to_tiffs(czidir: str,
             tilepos = czi.read_subblock_rect(S=0, T=0, C=0, Z=0, M=m) # returns: (x, y, w, h)
             tiles.append(tilepos)
             # Iterate over channel and focus
-            for (c, z) in product(range(C), range(Z)): 
+            for (c, z) in product(range(C), range(Z)):
                 # Get tile position
                 cur_tilepos = czi.read_subblock_rect(S=0, T=0, C=c, Z=z, M=m)
                 if cur_tilepos != tilepos:

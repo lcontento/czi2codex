@@ -44,7 +44,7 @@ $ pip install .
 # Generation of standard setting file
 Enter the directory of the source code:
 ```
-$ cd src
+$ cd czi2codex
 ```
 A prerequisite of using the czi2codex conversion-tool is having an 
 `options.yaml` file, where mandatory user settings can be saved/changed. In order
