@@ -1,0 +1,28 @@
+1_channelnames_dir: /home/erika/Documents/Projects/CODEX/Data/test_czi2codex/final_test/channelnames.txt
+1_czidir: /home/erika/Documents/Projects/CODEX/Data/test_czi2codex/final_test/dataXYZ-CYC{:02}.czi
+1_out_template: 1_{m:05}_Z{z:03}_CH{c:03}
+1_outdir: /home/erika/Documents/Projects/CODEX/Data/test_czi2codex/final_test/
+1_overwrite_exposure_times: false
+codex_instrument: CODEX instrument
+deconvolutionIterations: 25
+deconvolutionModel: vectorial
+numSubTiles: 1
+num_z_planes: 1
+referenceChannel: 1
+referenceCycle: 2
+tile_height_minus_overlap: null
+tile_width_minus_overlap: null
+tilingMode: gridrows
+use3dDriftCompensation: true
+useBackgroundSubtraction: true
+useBleachMinimizingCrop: false
+useBlindDeconvolution: false
+useDeconvolution: true
+useDiagnosticMode: false
+useExtendedDepthOfField: true
+useShadingCorrection: true
+wavelengths:
+- 1
+- 2
+- 3
+- 4
