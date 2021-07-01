@@ -53,7 +53,7 @@ user, you can run:
 ```buildoutcfg
 $ python3 run_generate_std_options_file.py /dir/to/optionsfile/
 ```
-with `/dir/to/optionsfile/options.yaml`, being the directory path, where this 
+with `/dir/to/optionsfile/`, being the directory path, where this 
 settings-file should be saved. 
 # Run czi2codex conversion
 Then you can call the czi2codex conversion tool:
