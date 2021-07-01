@@ -64,10 +64,11 @@ if __name__ == "__main__":
                         type=str)
 
     args = parser.parse_args()
-    with open(args.options_dir) as yaml_file:
-        user_input = yaml.load(yaml_file, Loader=yaml.FullLoader)
+    # with open(args.options_dir) as yaml_file:
+    #     user_input = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
-    generate_std_options_file(user_input['1_outdir'], filename='', save=True)
+    # generate_std_options_file(user_input['1_outdir'], filename='', save=True)
+    generate_std_options_file(args.options_dir, filename='', save=True)
 
 
 
