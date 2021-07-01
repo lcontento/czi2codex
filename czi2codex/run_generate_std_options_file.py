@@ -53,21 +53,14 @@ def generate_std_options_file(outdir: str,
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Run conversion czi to codex-'
-                                                 'format. Writes '
-                                                 'exposure_times.txt and '
-                                                 'experiment.json. Input: '
-                                                 'Directory to options.yaml')
+    parser = argparse.ArgumentParser(description='Generate standard '
+                                                 'options.yaml file.')
     parser.add_argument("options_dir", help="Directory to options.yaml file."
-                                            " (e.g. '/dir/to/optionfile/"
-                                            "options.yaml')",
+                                            " (e.g. '/dir/to/optionfile/')",
                         type=str)
 
     args = parser.parse_args()
-    # with open(args.options_dir) as yaml_file:
-    #     user_input = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
-    # generate_std_options_file(user_input['1_outdir'], filename='', save=True)
     generate_std_options_file(args.options_dir, filename='', save=True)
 
 
