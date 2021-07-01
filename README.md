@@ -51,7 +51,7 @@ A prerequisite of using the czi2codex conversion-tool is having an
 to generate the backbone of this file, which then needs to be filled by the 
 user, you can run:
 ```buildoutcfg
-$ python3 run_generate_std_options_file.py /dir/to/optionsfile/options.yaml
+$ python3 run_generate_std_options_file.py /dir/to/optionsfile/
 ```
 with `/dir/to/optionsfile/options.yaml`, being the directory path, where this 
 settings-file should be saved. 
