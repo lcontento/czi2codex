@@ -4,6 +4,7 @@ from czi2tif_codex import czi_to_tiffs
 from generate_metadata_json import meta_to_json
 import argparse
 import yaml
+import os
 
 
 def czi2codex_all(options_dir: str):
@@ -38,6 +39,19 @@ def czi2codex_all(options_dir: str):
     outdir = user_input['1_outdir']
     out_tempate = user_input['1_out_template']
     overwrite_exposure_times = user_input['1_overwrite_exposure_times']
+
+    if not os.path.exists(channelnames_dir):
+        raise FileNotFoundError('File not found. Please check directory to the '
+                                'channelnames.txt, which should be defined in '
+                                '"1_channelnames_dir:" in options.yaml. \nFile '
+                                'not found: ' + channelnames_dir)
+    if not os.path.exists(outdir):
+        raise FileNotFoundError('Directory not found. Please check the ouput '
+                                'directory '
+                                'where the output shall be saved. The output '
+                                'directory should be defined in "1_outdir:" '
+                                'in options.yaml. \nDirectory  not found: ' +
+                                outdir)
 
     # convert czi to tifs & generate exposure_times.txt
     _, _, _, meta, _ = czi_to_tiffs(czidir,
