@@ -14,9 +14,9 @@ def generate_std_options_file(outdir: str,
     filename: str
         add-ons for the filename: options_ADD_ON_FILENAME.yaml
     """
-    user_setting = {'1_czidir': "/home/erika/Documents/Projects/CODEX/Data/Collaborators_OriginalData/20200708 Tonsil_beta_after2_compressed/2020.07.08 Tonsil_betaTEST_sfter2-{:02}.czi",
-                    '1_outdir': "/home/erika/Documents/Projects/CODEX/Data/test_czi2codex/all_cycles/",
-                    '1_channelnames_dir': "/home/erika/Documents/Projects/CODEX/Data/test_czi2codex/ORIGINAL_FILES/channelNamesSONIA.txt",
+    user_setting = {'1_czidir': os.path.join(outdir,"dataXYZ-CYC{:02}.czi"),
+                    '1_outdir': outdir,
+                    '1_channelnames_dir': os.path.join(outdir,"channelnames.txt"),
                     '1_overwrite_exposure_times': False,
                     '1_out_template': "1_{m:05}_Z{z:03}_CH{c:03}",
                     'codex_instrument': "CODEX instrument",
