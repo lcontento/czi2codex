@@ -1,15 +1,12 @@
+# from .czi2tif_codex import czi_to_tiffs #for jupyter-notebook
+# from .generate_metadata_json import meta_to_json #for jupyter-notebook
 from czi2tif_codex import czi_to_tiffs
 from generate_metadata_json import meta_to_json
 import argparse
 import yaml
 
 
-def czi2codex_all(czidir: str,
-                  outdir: str,
-                  channelnames_dir: str,
-                  options_dir: str,
-                  out_template: str = '1_{m:05}_Z{z:03}_CH{c:03}',
-                  overwrite_exposure: bool = False):
+def czi2codex_all(options_dir: str):
     """
     Run the complete czi2codex-formatting. First create tif files for all
     cycles, channels, mosaics, Z-planes; then generate 'exposure_times.txt'-
@@ -32,10 +29,21 @@ def czi2codex_all(czidir: str,
     overwrite_exposure: bool
         if exposure_times.txt exist, shall it then be overwritten?
     """
+    # read standard options file
+    with open(options_dir) as yaml_file:
+        user_input = yaml.load(yaml_file, Loader=yaml.FullLoader)
+
+    channelnames_dir = user_input['1_channelnames_dir']
+    czidir = user_input['1_czidir']
+    outdir = user_input['1_outdir']
+    out_tempate = user_input['1_out_template']
+    overwrite_exposure_times = user_input['1_overwrite_exposure_times']
+
     # convert czi to tifs & generate exposure_times.txt
     _, _, _, meta, _ = czi_to_tiffs(czidir,
                                     outdir,
-                                    out_template, overwrite_exposure)
+                                    out_tempate,
+                                    overwrite_exposure_times)
     # generate experiment.json
     meta_to_json(meta, czidir, outdir,
                  channelnames_dir, options_dir)
@@ -54,13 +62,8 @@ if __name__ == "__main__":
                         type=str)
 
     args = parser.parse_args()
-    with open(args.options_dir) as yaml_file:
-        user_input = yaml.load(yaml_file, Loader=yaml.FullLoader)
+    # with open(args.options_dir) as yaml_file:
+    #     user_input = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
-    czi2codex_all(czidir=user_input['1_czidir'],
-                  outdir=user_input['1_outdir'],
-                  channelnames_dir=user_input['1_channelnames_dir'],
-                  options_dir=args.options_dir,
-                  out_template=user_input['1_out_template'],
-                  overwrite_exposure=user_input['1_overwrite_exposure_times'])
+    czi2codex_all(options_dir=args.options_dir)
 
