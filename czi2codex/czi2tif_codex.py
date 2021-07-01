@@ -106,6 +106,12 @@ def czi_to_tiffs(czidir: str,
     # list of czi-files
     czi_files = glob.glob(os.path.join(basedir, '*' + czi_ext))
     num_cycles = len(czi_files)
+    if num_cycles==0:
+        raise FileNotFoundError('No czi-files where found in the '
+                                'user specified directory: \n' + czidir +
+                                '\n Please check the defined directory '
+                                '"1_czidir" in the options.yaml file.')
+
     # loop over cycles
     for i_cyc in range(1, num_cycles+1):
         # name of czi file without .czi extension
