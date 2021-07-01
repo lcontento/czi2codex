@@ -14,6 +14,8 @@ from lxml import etree
 from typing import Union
 import shutil
 from datetime import datetime
+#import czi2codex
+# from .run_generate_std_options_file import generate_std_options_file  #for jupyter-notebook
 from run_generate_std_options_file import generate_std_options_file
 
 # TODO: cannot find wavelengths, that are given in Sonias experiment.json file
@@ -22,9 +24,8 @@ from run_generate_std_options_file import generate_std_options_file
 #    488,
 #    550,
 #    650
-#  ], (mine (Emission Wavelenghts are: [465, 561, 673, 773]
+#  ], (mine (Emission Wavelenghts are: [465, 561, 673, 773] -> user defineable
 # TODO: YAML file with comments?
-# TODO: add documentation
 # INFORMATION:
 #   - For now: take only the metadata of first cycle to infer all necessary
 #     information
