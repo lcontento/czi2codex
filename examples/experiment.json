@@ -1,15 +1,18 @@
 {
-    "name": "2020.07.08 Tonsil_betaTEST_sfter2-04",
+    "version": "1.x.x.x",
+    "name": "2020.07.08 Tonsil_betaTEST_sfter2-01",
+    "runName": "2020-11-04",
     "date": "2020-07-08T16:13:40.1090992+02:00",
+    "dateProcessed": "2021-07-01T14:43:52.119362",
     "path": "/home/erika/Documents/Projects/CODEX/Data/Collaborators_OriginalData/20200708 Tonsil_beta_after2_compressed",
-    "outputPath": "/home/erika/Documents/Projects/CODEX/Data/test_czi2codex/",
+    "outputPath": "/home/erika/Documents/Projects/CODEX/Data/Collaborators_OriginalData/final_test",
     "codex_instrument": "CODEX instrument",
     "microscope": "Axio Observer.Z1 / 7",
-    "magnification": "20.0",
-    "numerical_aperture": "0.8",
+    "magnification": 20.0,
+    "aperture": 0.8,
     "objectiveType": "Air",
-    "xyResolution": "325.0",
-    "zPitch": "1500.0",
+    "xyResolution": 325.0,
+    "zPitch": 1500.0,
     "per_cycle_channel_names": [
         "DAPI",
         "Cy3",
@@ -17,10 +20,10 @@
         "Cy7"
     ],
     "wavelengths": [
-        465,
-        561,
-        673,
-        773
+        1,
+        2,
+        3,
+        4
     ],
     "bitDepth": 16,
     "numRegions": 1,
@@ -31,15 +34,15 @@
     "regionHeight": 5,
     "tileWidth": 2048,
     "tileHeight": 2048,
-    "tileOverlapX": 205,
-    "tileOverlapY": 205,
+    "tileOverlapX": 0.1,
+    "tileOverlapY": 0.1,
     "tilingMode": "gridrows",
-    "referenceCycle": "2",
-    "referenceChannel": "1",
-    "numSubTiles": "1",
-    "deconvolutionIterations": "25",
+    "referenceCycle": 2,
+    "referenceChannel": 1,
+    "numSubTiles": 1,
+    "deconvolutionIterations": 25,
     "deconvolutionModel": "vectorial",
-    "focusingOffset": "0",
+    "focusingOffset": 0,
     "useBackgroundSubtraction": true,
     "useDeconvolution": true,
     "useExtendedDepthOfField": true,
@@ -51,6 +54,10 @@
     "channelNames": {
         "channelNamesArray": [
             "DAPI1",
+            "Blank",
+            "Blank",
+            "Blank",
+            "DAPI2",
             "Blank",
             "Blank",
             "Blank"
@@ -67,22 +74,29 @@
             ],
             [
                 "1",
-                "10",
+                "5",
+                "350",
+                "500",
+                "500"
+            ],
+            [
+                "1",
+                "5",
                 "350",
                 "500",
                 "500"
             ]
         ]
     },
-    "projName": "2020.07.08 Tonsil_betaTEST_sfter2-04",
+    "projName": "2020.07.08 Tonsil_betaTEST_sfter2-01",
     "regIdx": [
         1
     ],
     "cycle_lower_limit": 1,
     "cycle_upper_limit": 4,
-    "num_z_planes": "1",
+    "num_z_planes": 1,
     "region_width": 5,
     "region_height": 5,
-    "tile_width": "1844",
-    "tile_height": "1844"
+    "tile_width": null,
+    "tile_height": null
 }
