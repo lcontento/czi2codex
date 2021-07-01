@@ -41,20 +41,22 @@ located, and run:
 $ pip install .
 ```
 
-# Generation of standard setting file
+# Generation of standard options file
 Enter the directory of the source code:
 ```
 $ cd czi2codex
 ```
 A prerequisite of using the czi2codex conversion-tool is having an 
-`options.yaml` file, where mandatory user settings can be saved/changed. In order
+`options.yaml` file, where mandatory user options can be saved/changed. In order
 to generate the backbone of this file, which then needs to be filled by the 
 user, you can run:
 ```buildoutcfg
 $ python3 run_generate_std_options_file.py /dir/to/optionsfile/
 ```
 with `/dir/to/optionsfile/`, being the directory path, where this 
-settings-file should be saved. 
+options-file should be saved. 
+You can find an example in the folder `examples/options.yaml` 
+for getting an idea how the `options.yaml` file will look like. 
 # Run czi2codex conversion
 Then you can call the czi2codex conversion tool:
 ```buildoutcfg
